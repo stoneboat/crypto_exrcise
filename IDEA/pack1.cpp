@@ -38,7 +38,7 @@ int main() {
 			int temp = doubleBytesTime(matrix_a[i][j], poly_b[j]);
 			count = count^temp;
 		}
-		poly_c[i] = modInGF(count, 17);
+		poly_c[i] = modInGF(count, 283);
 	}
 	for (int i = 0; i < 4; i++)
 		cout << hex << poly_c[i] << "  ";
