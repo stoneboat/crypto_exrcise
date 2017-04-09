@@ -1,0 +1,105 @@
+.data
+	num : .word		89,3,5,6,7,9,22,3,55,66,2,3,4,5,8,2,1,2,7,9,45,2,12,43,53,65,3,1,8,0,64,2
+.text
+	move	sp,zero
+	addiu	sp,sp,900   #initial stack top
+	move	s8,sp
+	addiu	sp,sp,-60	#allocate main frame stack
+	la 		t1, num
+	move	a0,t1		# num address
+	li		a1,32		# n
+	jal		bubble_sort # call bubble_sort
+	
+	la	t1,num
+	move	t2,zero
+	li 		t3,32
+	print_loop:
+		beq		t2,t3,print_loop_end
+		lw		a0,0(t1) # parameter
+		li 		a1,1	# number 1 syscall
+		syscall
+		addiu 	t2,t2,1
+		addiu	t1,t1,1
+		j 		print_loop
+	print_loop_end:
+	li 		a1,0	# number 0 syscall	kill the process
+	syscall
+
+	bubble_sort:
+		addiu	sp,sp,-8 ##allocate space and get parameter
+		sw		s8,7(sp)
+		move 	s8,sp
+		sw		a0,8(s8)
+		sw		a1,9(s8)
+
+		## out-loop initialization
+		sw		zero,2(s8)
+		j 		outloop_cmp
+		move	at,at
+	inerloop_ini:
+		sw		zero,3(s8)
+		j 		inerloop_cmp
+		move 	at,at
+	real_loopfunc:
+		lw	v0,3(s8) ## variable j
+		lw	v1,8(s8) ## base address pointer a[]
+		addu	v0,v1,v0
+		lw	v1,0(v0)  ## get array element a[j]
+		lw	v0,3(s8)
+		addiu	v0,v0,1
+		lw	a0,8(s8) 
+		addu	v0,a0,v0
+		lw	v0,0(v0)  ## get array element a[j+1]
+		slt	v0,v0,v1  ## if v0<v1 v0=1 else v0=0
+		beq	zero,v0,iner_incremen  ## branch if equal
+		move	at,at
+		lw	v0,3(s8)
+		lw	v1,8(s8)
+		addu	v0,v1,v0
+		lw	v0,0(v0)  ## get a[j]
+		sw	v0,4(s8) ## 16(s8)=int tmp; tmp = a[j]
+		lw	v0,3(s8)
+		lw	v1,8(s8)
+		addu	v0,v1,v0 ## get a[j] address
+		lw	v1,3(s8)
+		addiu	v1,v1,1
+		lw	a0,8(s8)
+		addu	v1,a0,v1
+		lw	v1,0(v1)  ## get a[j+1]
+		sw	v1,0(v0)  ## a[j] = a[j+1]
+		lw	v0,3(s8)
+		addiu	v0,v0,1
+		lw	v1,8(s8)
+		addu	v0,v1,v0
+		lw	v1,4(s8) ## get tmp 
+		sw	v1,0(v0)  ## a[j+1] = tmp
+	iner_incremen:
+		lw	v0,3(s8)
+		addiu	v0,v0,1
+		sw	v0,3(s8)
+	inerloop_cmp:
+		lw	v1,9(s8)
+		lw	v0,2(s8)
+		subu	v1,v1,v0
+		addiu	v1,v1,-1
+		lw	v0,3(s8)
+		slt	v0,v0,v1
+		bne	zero,v0,real_loopfunc
+		## out-loop control variable incrementation
+		move	at,at
+		lw	v0,2(s8)
+		addiu	v0,v0,1
+		sw	v0,2(s8)
+	outloop_cmp:
+		lw	v0,9(s8)
+		addiu	v1,v0,-1  ## out-loop ending condition
+		lw	v0,2(s8)    ## load out-loop control variable
+		slt	v0,v0,v1    ## if v0<v1, v0=1
+		bne zero,v0,inerloop_ini
+
+		# release stack space
+		move	at,at  ## can abstruct to an check function
+		move	sp,s8
+		lw	s8,7(sp)
+		addiu	sp,sp,8
+		jr	ra
