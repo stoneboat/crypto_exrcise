@@ -1,0 +1,3 @@
+the log is generating at 2017-04-16 15:46:38
+average pixel differential is	6
+different pixel number is	249646
