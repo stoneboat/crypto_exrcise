@@ -1,0 +1,6 @@
+li	a1,32	# n
+addiu	sp,sp,90
+li	v1,1	# n
+li	v0,3	# n
+li	ra,32	# n
+addu	sp,sp,a1
